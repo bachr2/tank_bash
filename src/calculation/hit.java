@@ -14,8 +14,13 @@ import tank_bash.test;
  * check hit collision<br>
  */
 public class hit {
-	
+	/**
+	 * Array list of tanks
+	 */
 	private ArrayList<tank> mytanks;
+	/**
+	 * my game map
+	 */
 	int[][] mymap = null;
 	
 	/**
@@ -32,7 +37,7 @@ public class hit {
 	 * <br>
 	 * add tank on the map<br>
 	 * 
-	 * @param tank the tank object to add
+	 * @param mytank the tank object to add
 	 * 
 	 */
 	public void add_tank(tank mytank) {
@@ -44,9 +49,9 @@ public class hit {
 	 * calculate if the shot hit anything on the map<br>
 	 * 
 	 * @param shot the shot to calculate the hit
-	 * @param player int which taplayer shot
+	 * @param player integer which player shot
 	 * 
-	 * @return int what got hit
+	 * @return integer what got hit
 	 */
 	public int calc_hit(shot shot, int player) {
 		tank myshooter = mytanks.get(player);
@@ -55,14 +60,25 @@ public class hit {
 		// create map
 		for(int i = 0; i < (int) test.width; i++){
 			for(int j = 0; j < (int) test.height; j++) {
-				// ground
-				if(j<20){
+				// ground 1
+				if(j<test.ground1_height){
+					mymap[i][j] = 0xF;
+				}
+				// ground 2
+				if(j>=test.ground1_height&&j<test.ground1_height+test.ground2_height){
 					mymap[i][j] = 0xF;
 				}
 				// bunker
+				if(j>=test.ground1_height+test.ground2_height
+						&& j < test.ground1_height+test.ground2_height+test.bunker_height
+						&& i >= (int)(test.width/2) - test.bunker_width/2
+						&& i <= (int)(test.width/2) + test.bunker_width/2
+				){
+					mymap[i][j] = 0xF;
+				}
+				// TODO add easter egg
 			}
 		}
-		// add easer egg
 		// add tanks to map
 		for(int i = 0; i < mytanks.size(); i++) {
 			tank mytank = mytanks.get(i);
@@ -70,7 +86,13 @@ public class hit {
 				for(int k = 0; k < mytank.get_tankdata().height; k++) {
 					int x = (int) (mytank.get_tankdata().posx - j);
 					int y = (int) (mytank.get_tankdata().posy + k);
-					mymap[x][y] = i+1;
+					if(x<mymap.length && x>=0)
+					{
+						if (y<mymap[x].length && y>=0)
+						{
+							mymap[x][y] = i+1;
+						}
+					}
 				}
 			}
 		}
@@ -84,7 +106,6 @@ public class hit {
 				if (shoty<mymap[shotx].length && shoty>=0)
 				{
 					if(mymap[shotx][shoty]>0) {
-						System.out.println("shot: x: "+shotx+" y: "+shoty+" map: "+mymap[shotx][shoty]);
 						shotdata.get(i).hit=true;
 						return mymap[shotx][shoty];
 					}

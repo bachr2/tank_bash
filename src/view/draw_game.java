@@ -15,6 +15,7 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -32,40 +33,154 @@ import calculation.tank;
  */
 @SuppressWarnings("serial")
 public class draw_game extends JPanel{
+	/**
+	 * Array of tanks
+	 */
 	private tank[] mytanks;
-	
+	/**
+	 * > 0 if shoting
+	 */
 	private int shoting = -1;
+	/**
+	 * shot data
+	 */
 	private shot theshot = null;
+	/**
+	 * shot counter
+	 */
 	private int shot_Counter = 0;
+	/**
+	 * show muzzle flash
+	 */
 	private int flashing = -1;
-	
+	/**
+	 * amount of trees in the game
+	 */
+	private int amount_tree = -1;
+	/**
+	 * amount of buildings in the game
+	 */
+	private int amount_buildings = -1;
+	/**
+	 * amount of clouds in the game
+	 */
+	private int amount_clouds = -1;
+	/**
+	 * Array for sorts of trees
+	 */
+	private int[] tree_x = null;
+	/**
+	 * background color
+	 */
 	private Color mybgc = null;
+	/**
+	 * background color1
+	 */
 	private Color mybgc1 = null;
+	/**
+	 * ground color dark
+	 */
 	private Color mygdc = null;
+	/**
+	 * ground color hell
+	 */
 	private Color myghc = null;
-	
+	/**
+	 * Rectangle for bullet
+	 */
 	private Rectangle bullet = null;
+	/**
+	 * Rectangles for tanks
+	 */
 	private Rectangle[] tank = null;
+	/**
+	 * Rectangles for barrels
+	 */
 	private Rectangle[] barrel = null;
-	
+	/**
+	 * Rectangle for ground
+	 */
 	private Rectangle ground_d = null;
+	/**
+	 * Rectangle for ground
+	 */
 	private Rectangle ground_h = null;
-	
+	/**
+	 * Rectangle for bunker
+	 */
+	private Rectangle bunker = null;
+	/**
+	 * Rectangles for trees
+	 */
+	private Rectangle[] tree = null;
+	/**
+	 * Image tanks
+	 */
 	private ImageIcon myimg[] = null;
+	/**
+	 * Image tanks
+	 */
     private Image img_tank[] = null;
+	/**
+	 * Image barrel
+	 */
     private ImageIcon myimg1[] = null;
+	/**
+	 * Image barrel
+	 */
     private Image img_barrel[] = null;
+	/**
+	 * Image bullet
+	 */
     private ImageIcon myimg2 = null;
+	/**
+	 * Image bullet
+	 */
     private Image img_bullet = null;
+	/**
+	 * Image muzzle flash
+	 */
     private ImageIcon myimg3 = null;
+	/**
+	 * Image muzzle flash
+	 */
     private Image img_muzfl = null;
+	/**
+	 * Image explosions
+	 */
     private ImageIcon myimg4 = null;
-    private Image img_explotion = null;
-    
-    private String daytime = null;
-    
+	/**
+	 * Image explosions
+	 */
+    private Image img_explosions = null;
+	/**
+	 * Image bunker
+	 */
+    private ImageIcon myimg5 = null;
+	/**
+	 * Image bunker
+	 */
+    private Image img_bunker = null;
+	/**
+	 * Image trees
+	 */
+    private ImageIcon myimg6[] = null;
+	/**
+	 * Image trees
+	 */
+    private Image img_tree[] = null;
+    /**
+     * Point of explosion
+     */
     private Point expl = null;
+    /**
+     * state of explosion
+     */
     private int expl_state = -1;
+    /**
+     * actual player
+     */
+    private int act_player = -1;
 	
 	@Override
     public void paintComponent(Graphics g) {
@@ -76,15 +191,17 @@ public class draw_game extends JPanel{
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		rh.put(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.setRenderingHints(rh);
-		
-		drawDesignStatic(g2d);
-		drawDesignDynamic(g2d);
-		for(int i = 0; i < mytanks.length; i++) {
-			drawShot(g2d,i);
-			drawLabel(g2d,i);
-			drawTank(g2d,i);
+
+		drawDesignNotHitable_f(g2d);
+		drawDesignHitable(g2d);
+		// draw with actual player in foreground
+		for(int i = act_player+mytanks.length; i >= act_player; i--) {
+			drawShot(g2d,i%mytanks.length);
+			drawLabel(g2d,i%mytanks.length);
+			drawTank(g2d,i%mytanks.length);
 		}
 		drawExplosion(g2d);
+		drawDesignNotHitable_b(g2d);
     }
 	/**
 	 * <h1>fire a shot</h1>
@@ -92,8 +209,8 @@ public class draw_game extends JPanel{
 	 * allow the draw process of the shot<br>
 	 * saves the data of the shot<br>
 	 * 
-	 * @param shot the shot to draw
-	 * @param tanknr int which tank
+	 * @param myshot the shot to draw
+	 * @param tanknr integer which tank
 	 */
 	public void shot(shot myshot, int tanknr) {
 		shoting = tanknr;
@@ -104,7 +221,7 @@ public class draw_game extends JPanel{
 	 * <br>
 	 * draws the different explosions<br>
 	 * 
-	 * @param g Graphics to show the objects
+	 * @param g2d Graphics to show the objects
 	 */
 	private void drawExplosion(Graphics2D g2d) {
 		if(expl!=null&&expl_state!=-1){
@@ -123,7 +240,7 @@ public class draw_game extends JPanel{
 			    //sx2 - the x coordinate of the second corner of the source rectangle.
 			    //sy2 - the y coordinate of the second corner of the source rectangle.
 			    //observer - object to be notified as more of the image is scaled and converted.
-				g2d.drawImage(img_explotion, expl.x-20, expl.y+20, expl.x+20, expl.y-20, expl_state*40, 0, expl_state*40+40, 40, this);
+				g2d.drawImage(img_explosions, expl.x-20, expl.y+20, expl.x+20, expl.y-20, expl_state*40, 0, expl_state*40+40, 40, this);
 				expl_state++;
 			}
 		}
@@ -131,36 +248,33 @@ public class draw_game extends JPanel{
 	/**
 	 * <h1>draw the design</h1>
 	 * <br>
-	 * draws the dynamic part of the world design<br>
+	 * draws the not hitable part of the world design<br>
 	 * 
-	 * @param g Graphics to show the objects
+	 * @param g2d Graphics to show the objects
 	 */
-	private void drawDesignDynamic(Graphics2D g2d) {
-	}
-	/**
-	 * <h1>draw the design</h1>
-	 * <br>
-	 * draws the static part of the world design<br>
-	 * 
-	 * @param g Graphics to show the objects
-	 */
-	private void drawDesignStatic(Graphics2D g2d) {
-		
+	private void drawDesignNotHitable_b(Graphics2D g2d) {
 		Color mycolor = g2d.getColor();
-		g2d.setFont(new Font("Purisa", Font.BOLD, 12));
-		g2d.setColor(mygdc);
-		ground_d.setBounds(0, (int) (test.height-10), (int) test.width, 10);
-		g2d.fill(ground_d);
-		
-		g2d.setColor(myghc);
-		ground_h.setBounds(0, (int) (test.height-20), (int) test.width, 10);
-		g2d.fill(ground_h);
-		
+		// top gradient
 		GradientPaint gp = new GradientPaint(0, 0, mybgc1, 0, 100, mybgc);
         g2d.setPaint(gp);
 		g2d.drawRect(0, 0, (int) test.width, 100);
 		g2d.fillRect(0, 0, (int) test.width, 100);
-		
+		// TODO sun
+		// TODO moon & stars
+		// TODO buildings
+		for(int i = 0; i < amount_buildings; i++){
+			
+		}
+		// TODO trees
+		for(int i = 0; i < amount_tree/2; i++){
+			tree[i].setLocation(tree_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+tree[i].height)));
+			g2d.drawImage(img_tree[i], tree[i].x, tree[i].y, this);
+		}
+		// TODO clouds
+		for(int i = 0; i < amount_clouds; i++){
+			
+		}
+		// TODO birds
 		g2d.setColor(mycolor);
 		
 		/*for(int i = 0; i < test.width; i+=10) {
@@ -170,11 +284,73 @@ public class draw_game extends JPanel{
 		}*/
 	}
 	/**
+	 * <h1>draw the design</h1>
+	 * <br>
+	 * draws the not hitable part of the world design<br>
+	 * 
+	 * @param g2d Graphics to show the objects
+	 */
+	private void drawDesignNotHitable_f(Graphics2D g2d) {
+		Color mycolor = g2d.getColor();
+		// top gradient
+		GradientPaint gp = new GradientPaint(0, 0, mybgc1, 0, 100, mybgc);
+        g2d.setPaint(gp);
+		g2d.drawRect(0, 0, (int) test.width, 100);
+		g2d.fillRect(0, 0, (int) test.width, 100);
+		// TODO trees
+		for(int i = amount_tree/2; i < amount_tree; i++){
+			tree[i].setLocation(tree_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+tree[i].height)));
+			g2d.drawImage(img_tree[i], tree[i].x, tree[i].y, this);
+		}
+		// TODO clouds
+		for(int i = 0; i < amount_clouds; i++){
+			
+		}
+		// TODO birds
+		g2d.setColor(mycolor);
+	}
+	/**
+	 * <h1>draw the design</h1>
+	 * <br>
+	 * draws the hitable part of the world design<br>
+	 * 
+	 * @param g2d Graphics to show the objects
+	 */
+	private void drawDesignHitable(Graphics2D g2d) {
+		
+		Color mycolor = g2d.getColor();
+		g2d.setFont(new Font("Purisa", Font.BOLD, 12));
+		// ground
+		g2d.setColor(mygdc);
+		ground_d.setBounds(0,
+				(int) (test.height-test.ground1_height),
+				(int) test.ground1_width,
+				(int) test.ground1_height
+		);
+		g2d.fill(ground_d);
+		g2d.setColor(myghc);
+		ground_h.setBounds(0,
+				(int) (test.height-(test.ground1_height+test.ground2_height)),
+				(int) test.ground2_width,
+				(int) test.ground2_height
+		);
+		g2d.fill(ground_h);
+		// bunker
+		bunker.setBounds((int) (test.width/2-test.bunker_width/2),
+				(int) (test.height-(test.ground1_height+test.ground2_height+test.bunker_height)),
+				(int) test.bunker_width,
+				(int) test.bunker_height
+		);
+		g2d.drawImage(img_bunker,bunker.x,bunker.y,this);
+		// TODO easteregg
+		g2d.setColor(mycolor);
+	}
+	/**
 	 * <h1>draw the shot</h1>
 	 * <br>
 	 * draws the shot which was fired<br>
 	 * 
-	 * @param g Graphics to show the objects
+	 * @param g2d Graphics to show the objects
 	 * @param tanknr int which tank
 	 */
 	private void drawShot(Graphics2D g2d, int tanknr) {
@@ -253,7 +429,7 @@ public class draw_game extends JPanel{
 	 * <br>
 	 * draws the label with stats<br>
 	 * 
-	 * @param g Graphics to show the objects
+	 * @param g2d Graphics to show the objects
 	 * @param tanknr int which tank
 	 */
 	private void drawLabel(Graphics2D g2d, int tanknr) {
@@ -265,32 +441,35 @@ public class draw_game extends JPanel{
         
         Color mycolor = g2d.getColor();
         if (tanknr%2==0) {
-			x = posx - (width);
+			x = 100 + (40 * tanknr) - width;
 		}
         else {
-			x = posx - (2*width);
+			x = (int) (test.width - ( 100 + (40 * tanknr)- width));
         }
-        g2d.setColor(Color.yellow);
 		int y=50;
-		g2d.drawString(daytime, (int) (test.width/2), y);
 		if(test.player!=tanknr){
         	g2d.setColor(Color.white);
         }
 		else{
 			 g2d.setColor(Color.yellow);
 		}
+		int offset=120;
+		String mytext = null;
+		if(mytanks[tanknr].is_dead()){
+	        g2d.setColor(mycolor);
+		}
         // 10+offset
-        int offset=80;
         y = (int) (10+offset);
-        String mytext = new String("Power: "+mytanks[tanknr].get_tankdata().power);
+        mytext = new String("Power: "+mytanks[tanknr].get_tankdata().power);
         g2d.drawString(mytext, x, y);
         // 10+offset
         offset+=20;
         y = (int) (10+offset);
         mytext = new String("Angle: "+mytanks[tanknr].get_tankdata().angle);
         g2d.drawString(mytext, x, y);
-        /*// 10+offset
+        // 10+offset
         offset+=20;
+        g2d.setColor(mycolor);
         y = (int) (10+offset);
         mytext = new String("posx: "+mytanks[tanknr].get_tankdata().posx);
         g2d.drawString(mytext, x, y);
@@ -298,16 +477,18 @@ public class draw_game extends JPanel{
         offset+=20;
         y = (int) (10+offset);
         mytext = new String("posy: "+mytanks[tanknr].get_tankdata().posy);
-        g2d.drawString(mytext, x, y);*/
-        g2d.setColor(Color.green);
+        g2d.drawString(mytext, x, y);
         // 10+offset
         offset+=20;
+	    if(!mytanks[tanknr].is_dead()){
+		    g2d.setColor(Color.green);
+		}
         y = (int) (10+offset);
         mytext = new String("score: "+mytanks[tanknr].get_score());
         g2d.drawString(mytext, x, y);
-        g2d.setColor(Color.red);
         // 10+offset
         offset+=20;
+        g2d.setColor(Color.red);
         y = (int) (10+offset);
         if(mytanks[tanknr].is_dead()){
         	mytext = new String("!!! FOOBAR !!!");
@@ -316,7 +497,28 @@ public class draw_game extends JPanel{
         	mytext = new String("hit: "+mytanks[tanknr].get_hit());
         }
         g2d.drawString(mytext, x, y);
+        if(test.player!=tanknr){
+        	g2d.setColor(Color.white);
+        }
+		else{
+			 g2d.setColor(Color.yellow);
+		}
+        if(mytanks[tanknr].is_dead()){
+	        g2d.setColor(mycolor);
+		}
+        if (tanknr%2==0) {
+			x = posx - (width);
+		}
+        else {
+			x = posx - width;
+        }
+        // 200+offset
+        offset+=200;
+        y = (int) (10+offset);
+        g2d.setFont(new Font("Purisa", Font.BOLD, 25));
+        g2d.drawString(""+(tanknr+1), x, y);
         g2d.setColor(mycolor);
+        g2d.setFont(new Font("Purisa", Font.BOLD, 12));
 	}
 
 	/**
@@ -324,7 +526,7 @@ public class draw_game extends JPanel{
 	 * <br>
 	 * draws the tank at the right position<br>
 	 * 
-	 * @param g Graphics to show the objects
+	 * @param g2d Graphics to show the objects
 	 * @param tanknr int which tank
 	 */
 	private void drawTank(Graphics2D g2d, int tanknr) {
@@ -351,7 +553,7 @@ public class draw_game extends JPanel{
 	 * <br>
 	 * draws the barrel of the tank in the correct angle<br>
 	 * 
-	 * @param g Graphics to show the objects
+	 * @param g2d Graphics to show the objects
 	 * @param tanknr int which tank
 	 */
 	private void drawBarrel(Graphics2D g2d, int tanknr) {
@@ -408,7 +610,7 @@ public class draw_game extends JPanel{
 	 * initialize the arrays<br>
 	 * create elements of the arrays<br>
 	 * 
-	 * @param tank[] holds all tanks which are involved in the game
+	 * @param tanks holds all tanks which are involved in the game
 	 */
 	public draw_game(tank[] tanks) {
 		Date mydate = new Date(); // date
@@ -417,31 +619,34 @@ public class draw_game extends JPanel{
 		timestamp/=60; // min
 		timestamp/=60; // h
 		
+		act_player = 0;
+		
+		Random myrandom = new Random();
+		amount_tree = 5+Math.abs(myrandom.nextInt()%20);
+		amount_buildings = 1+Math.abs(myrandom.nextInt()%7);
+		amount_clouds = 2+Math.abs(myrandom.nextInt()%20);
+		
 		setSize((int) test.width, (int) test.width);
 		
 		mytanks=tanks;
 		
-		// 5 - 9
+		// 5 - 9 morning
 		if(timestamp%24>=5 && timestamp%24<10){
-			daytime = new String("morning");
 			mybgc = new Color(14, 131, 205);
 			mybgc1 = new Color(0, 0, 0);
 		}
-		// 10 - 16
+		// 10 - 16 day
 		else if(timestamp%24>=10 && timestamp%24<17){
-			daytime = new String("day");
 			mybgc = new Color(14, 131, 205);
 			mybgc1 = new Color(0, 0, 0);
 		}
-		// 17 - 20
+		// 17 - 20 evening
 		else if(timestamp%24>=17 && timestamp%24<21){
-			daytime = new String("evening");
 			mybgc = new Color(8, 12, 68);
 			mybgc1 = new Color(0, 0, 0);
 		}
-		// 21 - 4
+		// 21 - 4 night
 		else{
-			daytime = new String("night");
 			mybgc = new Color(8, 12, 68);
 			mybgc1 = new Color(0, 0, 0);
 		}
@@ -450,34 +655,76 @@ public class draw_game extends JPanel{
 		this.setBackground(mybgc);
 		
 		bullet = new Rectangle();
+		bunker = new Rectangle();
 		ground_d = new Rectangle();
 		ground_h = new Rectangle();
+		tree = new Rectangle[amount_tree];
 		tank = new Rectangle[tanks.length];
 		barrel = new Rectangle[tanks.length];
 		myimg = new ImageIcon[tanks.length];
 		img_tank = new Image[tanks.length];
 		myimg1 = new ImageIcon[tanks.length];
 		img_barrel = new Image[tanks.length];
-		myimg2 = new ImageIcon("bullet.png");
+		myimg2 = new ImageIcon(this.getClass().getResource("/bullet.png"));
 		img_bullet = myimg2.getImage();
-		myimg3 = new ImageIcon("muzzleflash.png");
+		myimg3 = new ImageIcon(this.getClass().getResource("/muzzleflash.png"));
 		img_muzfl = myimg3.getImage();
-		myimg4 = new ImageIcon("explosion_sprite.png");
-		img_explotion = myimg4.getImage();
+		myimg4 = new ImageIcon(this.getClass().getResource("/explosion_sprite.png"));
+		img_explosions = myimg4.getImage();
+		myimg5 = new ImageIcon(this.getClass().getResource("/bunker.png"));
+		img_bunker = myimg5.getImage();
+		myimg6 = new ImageIcon[2];
+		img_tree = new Image[amount_tree];
+		tree_x = new int[amount_tree];
 		
+		// tanks
 		for(int i = 0; i < tank.length; i++) {
 			tank[i] = new Rectangle();
 			barrel[i] = new Rectangle();
 			if (i%2==0) {
-		    	myimg[i] = new ImageIcon("tank_0.png");
-		    	myimg1[i] = new ImageIcon("barrel_0.png");
+		    	myimg[i] = new ImageIcon(this.getClass().getResource("/tank_0.png"));
+		    	myimg1[i] = new ImageIcon(this.getClass().getResource("/barrel_0.png"));
 		    }
 		    else {
-		    	myimg[i] = new ImageIcon("tank_1.png");
-		    	myimg1[i] = new ImageIcon("barrel_1.png");
+		    	myimg[i] = new ImageIcon(this.getClass().getResource("/tank_1.png"));
+		    	myimg1[i] = new ImageIcon(this.getClass().getResource("/barrel_1.png"));
 		    }
 		    img_tank[i] = myimg[i].getImage();
 		    img_barrel[i] = myimg1[i].getImage();
+		}
+		
+		// buildings
+		for(int i = 0; i < amount_buildings; i++){
+			
+		}
+		// trees
+		myimg6[0] = new ImageIcon(this.getClass().getResource("/tree_d.png"));
+		myimg6[1] = new ImageIcon(this.getClass().getResource("/tree_p.png"));
+		for(int i = 0; i < amount_tree; i++){
+			tree[i] = new Rectangle();
+			tree_x[i] = myrandom.nextInt()%(int)test.width;
+			int width, height;
+			double scale = myrandom.nextInt()%35;
+			if(scale < 0.0){
+				scale*=-1;
+			}
+			width = 1 + (int) (( (double)myimg6[0].getIconWidth() * (90+scale)) / 100.0 );
+			height = 1 + (int) (( (double)myimg6[0].getIconHeight() * (90+scale)) / 100.0 );
+			tree[i].setSize(width, height);
+			ImageIcon tmp = new ImageIcon();
+			if(myrandom.nextInt()%2==0){
+				tmp = myimg6[0];
+				tmp.setImage(myimg6[0].getImage().getScaledInstance(width,height,Image.SCALE_DEFAULT)); 
+			}
+			else{
+				tmp = myimg6[1];
+				tmp.setImage(myimg6[1].getImage().getScaledInstance(width,height,Image.SCALE_DEFAULT));
+			}
+		    img_tree[i] = tmp.getImage();
+		}
+		// clouds
+		for(int i = 0; i < amount_clouds; i++){
+			
 		}
 		
 	}
@@ -495,5 +742,15 @@ public class draw_game extends JPanel{
 		else {
 			return true;
 		}
+	}
+	/**
+	 * <h1>set player</h1>
+	 * <br>
+	 * set the actual gaming player<br>
+	 * 
+	 * @param player
+	 */
+	public void set_player(int player) {
+		act_player = player;
 	}
 }

@@ -12,9 +12,13 @@ import java.util.ArrayList;
  * calculate shot data<br>
  */
 public class shot {
-	
+	/**
+	 * time step
+	 */
     private double step=.01;
-    
+    /**
+     * my shot data
+     */
     private ArrayList<shot_data> mydata;
     
     /**
