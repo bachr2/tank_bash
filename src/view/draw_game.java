@@ -70,6 +70,14 @@ public class draw_game extends JPanel{
 	 */
 	private int[] tree_x = null;
 	/**
+	 * Array for sorts of houses
+	 */
+	private int[] house_x = null;
+	/**
+	 * Array for elements of houses
+	 */
+	private int[] house_elements = null;
+	/**
 	 * background color
 	 */
 	private Color mybgc = null;
@@ -113,6 +121,10 @@ public class draw_game extends JPanel{
 	 * Rectangles for trees
 	 */
 	private Rectangle[] tree = null;
+	/**
+	 * Rectangles for trees
+	 */
+	private Rectangle[] house = null;
 	/**
 	 * Image tanks
 	 */
@@ -161,7 +173,7 @@ public class draw_game extends JPanel{
 	 * Image bunker
 	 */
     private Image img_bunker = null;
-	/**
+    /**
 	 * Image trees
 	 */
     private ImageIcon myimg6[] = null;
@@ -169,6 +181,22 @@ public class draw_game extends JPanel{
 	 * Image trees
 	 */
     private Image img_tree[] = null;
+    /**
+	 * Image house
+	 */
+    private ImageIcon myimg7[] = null;
+	/**
+	 * Image house
+	 */
+    private Image img_house[] = null;
+    /**
+	 * Image top of house
+	 */
+    private ImageIcon myimg8[] = null;
+	/**
+	 * Image top of house
+	 */
+    private Image img_top[] = null;
     /**
      * Point of explosion
      */
@@ -192,7 +220,7 @@ public class draw_game extends JPanel{
 		rh.put(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.setRenderingHints(rh);
 
-		drawDesignNotHitable_f(g2d);
+		drawDesignNotHitable_b(g2d);
 		drawDesignHitable(g2d);
 		// draw with actual player in foreground
 		for(int i = act_player+mytanks.length; i >= act_player; i--) {
@@ -201,7 +229,7 @@ public class draw_game extends JPanel{
 			drawTank(g2d,i%mytanks.length);
 		}
 		drawExplosion(g2d);
-		drawDesignNotHitable_b(g2d);
+		drawDesignNotHitable_f(g2d);
     }
 	/**
 	 * <h1>fire a shot</h1>
@@ -261,11 +289,15 @@ public class draw_game extends JPanel{
 		g2d.fillRect(0, 0, (int) test.width, 100);
 		// TODO sun
 		// TODO moon & stars
-		// TODO buildings
+		// buildings
 		for(int i = 0; i < amount_buildings; i++){
-			
+			house[i].setLocation(house_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+house[i].height)));
+			for(int j = 0; j < house_elements[i]; j++){
+				g2d.drawImage(img_house[i], house[i].x, img_top[i].getHeight(null)+(img_house[i].getHeight(null)*j)+house[i].y, this);
+			}
+			g2d.drawImage(img_top[i], house[i].x, house[i].y, this);
 		}
-		// TODO trees
+		// trees
 		for(int i = 0; i < amount_tree/2; i++){
 			tree[i].setLocation(tree_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+tree[i].height)));
 			g2d.drawImage(img_tree[i], tree[i].x, tree[i].y, this);
@@ -297,7 +329,7 @@ public class draw_game extends JPanel{
         g2d.setPaint(gp);
 		g2d.drawRect(0, 0, (int) test.width, 100);
 		g2d.fillRect(0, 0, (int) test.width, 100);
-		// TODO trees
+		// trees
 		for(int i = amount_tree/2; i < amount_tree; i++){
 			tree[i].setLocation(tree_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+tree[i].height)));
 			g2d.drawImage(img_tree[i], tree[i].x, tree[i].y, this);
@@ -659,6 +691,7 @@ public class draw_game extends JPanel{
 		ground_d = new Rectangle();
 		ground_h = new Rectangle();
 		tree = new Rectangle[amount_tree];
+		house = new Rectangle[amount_buildings];
 		tank = new Rectangle[tanks.length];
 		barrel = new Rectangle[tanks.length];
 		myimg = new ImageIcon[tanks.length];
@@ -676,6 +709,12 @@ public class draw_game extends JPanel{
 		myimg6 = new ImageIcon[2];
 		img_tree = new Image[amount_tree];
 		tree_x = new int[amount_tree];
+		myimg7 = new ImageIcon[2];
+		myimg8 = new ImageIcon[2];
+		img_house = new Image[amount_buildings];
+		img_top = new Image[amount_buildings];
+		house_x = new int[amount_buildings];
+		house_elements = new int[amount_buildings];
 		
 		// tanks
 		for(int i = 0; i < tank.length; i++) {
@@ -694,8 +733,41 @@ public class draw_game extends JPanel{
 		}
 		
 		// buildings
+		myimg7[0] = new ImageIcon(this.getClass().getResource("/house_0.png"));
+		myimg7[1] = new ImageIcon(this.getClass().getResource("/house_1.png"));
+		myimg8[0] = new ImageIcon(this.getClass().getResource("/top_0.png"));
+		myimg8[1] = new ImageIcon(this.getClass().getResource("/top_1.png"));
 		for(int i = 0; i < amount_buildings; i++){
-			
+			house[i] = new Rectangle();
+			house_x[i] = myrandom.nextInt()%(int)test.width;
+			house_elements[i] = myrandom.nextInt()%(int)2;
+			if(house_x[i] < 0){
+				house_x[i]*=-1;
+			}
+			if(house_elements[i] < 0){
+				house_elements[i]*=-1;
+			}
+			house_elements[i]++;
+			int width, height;
+			width = myimg7[0].getIconWidth();
+			height = house_elements[i] * myimg7[0].getIconHeight() + myimg8[0].getIconHeight();
+			house[i].setSize(width, height);
+			ImageIcon tmp = new ImageIcon();
+			ImageIcon tmp1 = new ImageIcon();
+			if(myrandom.nextInt()%2==0){
+				tmp = myimg7[0];
+				tmp.setImage(myimg7[0].getImage()); 
+				tmp1 = myimg8[0];
+				tmp1.setImage(myimg8[0].getImage()); 
+			}
+			else{
+				tmp = myimg7[1];
+				tmp.setImage(myimg7[1].getImage());
+				tmp1 = myimg8[1];
+				tmp1.setImage(myimg8[1].getImage());
+			}
+			img_house[i] = tmp.getImage();
+			img_top[i] = tmp1.getImage();
 		}
 		// trees
 		myimg6[0] = new ImageIcon(this.getClass().getResource("/tree_d.png"));
@@ -703,6 +775,9 @@ public class draw_game extends JPanel{
 		for(int i = 0; i < amount_tree; i++){
 			tree[i] = new Rectangle();
 			tree_x[i] = myrandom.nextInt()%(int)test.width;
+			if(tree_x[i] < 0){
+				tree_x[i]*=-1;
+			}
 			int width, height;
 			double scale = myrandom.nextInt()%35;
 			if(scale < 0.0){
