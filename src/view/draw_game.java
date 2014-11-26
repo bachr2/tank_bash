@@ -12,7 +12,10 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
@@ -65,6 +68,14 @@ public class draw_game extends JPanel{
 	 * amount of clouds in the game
 	 */
 	private int amount_clouds = -1;
+	/**
+	 * amount of stars in the game
+	 */
+	private int amount_stars = -1;
+	/**
+	 * daytime state
+	 */
+	private int daytime = -1;
 	/**
 	 * Array for sorts of trees
 	 */
@@ -242,14 +253,15 @@ public class draw_game extends JPanel{
 
 		drawDesignNotHitable_b(g2d);
 		drawDesignHitable(g2d);
-		// draw with actual player in foreground
 		for(int i = act_player+mytanks.length; i >= act_player; i--) {
 			drawShot(g2d,i%mytanks.length);
-			drawLabel(g2d,i%mytanks.length);
 			drawTank(g2d,i%mytanks.length);
 		}
 		drawExplosion(g2d);
 		drawDesignNotHitable_f(g2d);
+		for(int i = act_player+mytanks.length; i >= act_player; i--) {
+			drawLabel(g2d,i%mytanks.length);
+		}
     }
 	/**
 	 * <h1>fire a shot</h1>
@@ -294,6 +306,33 @@ public class draw_game extends JPanel{
 		}
 	}
 	/**
+	 * <h1>create a star shape</h1>
+	 * <br>
+	 * creating a star with swing<br>
+	 * 
+	 * @param arms amount of arms
+	 * @param center of the star
+	 * @param rOuter outer radius
+	 * @param rInner inner radius
+	 * @return shape of a star
+	 */
+	public static Shape createStar(int arms, Point center, double rOuter, double rInner)
+	{
+	    double angle = Math.PI / arms;
+
+	    GeneralPath path = new GeneralPath();
+
+	    for (int i = 0; i < 2 * arms; i++)
+	    {
+	        double r = (i & 1) == 0 ? rOuter : rInner;
+	        Point2D.Double p = new Point2D.Double(center.x + Math.cos(i * angle) * r, center.y + Math.sin(i * angle) * r);
+	        if (i == 0) path.moveTo(p.getX(), p.getY());
+	        else path.lineTo(p.getX(), p.getY());
+	    }
+	    path.closePath();
+	    return path;
+	}
+	/**
 	 * <h1>draw the design</h1>
 	 * <br>
 	 * draws the not hitable part of the world design<br>
@@ -307,8 +346,26 @@ public class draw_game extends JPanel{
         g2d.setPaint(gp);
 		g2d.drawRect(0, 0, (int) test.width, 100);
 		g2d.fillRect(0, 0, (int) test.width, 100);
-		// TODO sun
-		// TODO moon & stars
+		// sun
+		if(daytime==0){
+			// TODO dawn & half sun
+		}
+		else if(daytime==1){
+			// TODO full sun
+		}
+		else if(daytime==2){
+			// TODO sunset & half sun
+		}
+		// moon & stars
+		if(daytime==0){
+			// TODO few stars
+		}
+		else if(daytime==2){
+			// TODO few stars
+		}
+		else if(daytime==3){
+			// TODO many stars & moon
+		}
 		// buildings
 		for(int i = 0; i < amount_buildings; i++){
 			house[i].setLocation(house_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+house[i].height)));
@@ -318,13 +375,13 @@ public class draw_game extends JPanel{
 			g2d.drawImage(img_top[i], house[i].x, house[i].y, this);
 		}
 		// trees
-		for(int i = 0; i < amount_tree/2; i++){
+		for(int i = 0; i < amount_tree*2/3; i++){
 			tree[i].setLocation(tree_x[i],(int) (test.height-(test.ground1_height+test.ground2_height+tree[i].height)));
 			g2d.drawImage(img_tree[i], tree[i].x, tree[i].y, this);
 		}
 		// clouds
 		Random myrandom = new Random();
-		for(int i = 0; i < amount_clouds/2; i++){
+		for(int i = 0; i < amount_clouds*2/3; i++){
 			cloud_x[i]+=1;
 			cloud[i].setLocation(cloud_x[i],cloud_y[i]);
 			g2d.drawImage(img_cloud[i], cloud[i].x, cloud[i].y, this);
@@ -337,12 +394,6 @@ public class draw_game extends JPanel{
 		}
 		// TODO birds
 		g2d.setColor(mycolor);
-		
-		/*for(int i = 0; i < test.width; i+=10) {
-			for(int j = 0; j < test.height; j+=10) {
-				g2d.drawRect(i, j, 10, 10);
-			}
-		}*/
 	}
 	/**
 	 * <h1>draw the design</h1>
@@ -353,19 +404,14 @@ public class draw_game extends JPanel{
 	 */
 	private void drawDesignNotHitable_f(Graphics2D g2d) {
 		Color mycolor = g2d.getColor();
-		// top gradient
-		GradientPaint gp = new GradientPaint(0, 0, mybgc1, 0, 100, mybgc);
-        g2d.setPaint(gp);
-		g2d.drawRect(0, 0, (int) test.width, 100);
-		g2d.fillRect(0, 0, (int) test.width, 100);
 		// trees
-		for(int i = amount_tree/2; i < amount_tree; i++){
+		for(int i = amount_tree*2/3; i < amount_tree; i++){
 			tree[i].setLocation(tree_x[i],(int) (test.height-(test.ground1_height+tree[i].height)));
 			g2d.drawImage(img_tree[i], tree[i].x, tree[i].y, this);
 		}
 		// clouds
 		Random myrandom = new Random();
-		for(int i = amount_clouds/2; i < amount_clouds; i++){
+		for(int i = amount_clouds*2/3; i < amount_clouds; i++){
 			cloud_x[i]+=2;
 			cloud[i].setLocation(cloud_x[i],cloud_y[i]);
 			g2d.drawImage(img_cloud[i], cloud[i].x, cloud[i].y, this);
@@ -523,7 +569,7 @@ public class draw_game extends JPanel{
 		else{
 			 g2d.setColor(Color.yellow);
 		}
-		int offset=180;
+		int offset=(int)(test.height/3);//230;
 		String mytext = null;
 		if(mytanks[tanknr].is_dead()){
 	        g2d.setColor(mycolor);
@@ -583,7 +629,7 @@ public class draw_game extends JPanel{
 			x = posx - width;
         }
         // 150+offset
-        offset+=150;
+        offset+=100;
         y = (int) (10+offset);
         g2d.setFont(new Font("Purisa", Font.BOLD, 25));
         g2d.drawString(""+(tanknr+1), x, y);
@@ -695,6 +741,7 @@ public class draw_game extends JPanel{
 		amount_tree = 5+Math.abs(myrandom.nextInt()%20);
 		amount_buildings = 1+Math.abs(myrandom.nextInt()%7);
 		amount_clouds = 6+Math.abs(myrandom.nextInt()%25);
+		amount_stars = 600+Math.abs(myrandom.nextInt()%600);
 		
 		setSize((int) test.width, (int) test.width);
 		
@@ -704,21 +751,25 @@ public class draw_game extends JPanel{
 		if(timestamp%24>=5 && timestamp%24<10){
 			mybgc = new Color(14, 131, 205);
 			mybgc1 = new Color(0, 0, 0);
+			daytime = 0;
 		}
 		// 10 - 16 day
 		else if(timestamp%24>=10 && timestamp%24<17){
 			mybgc = new Color(14, 131, 205);
 			mybgc1 = new Color(0, 0, 0);
+			daytime = 1;
 		}
 		// 17 - 20 evening
 		else if(timestamp%24>=17 && timestamp%24<21){
 			mybgc = new Color(8, 12, 68);
 			mybgc1 = new Color(0, 0, 0);
+			daytime = 2;
 		}
 		// 21 - 4 night
 		else{
 			mybgc = new Color(8, 12, 68);
 			mybgc1 = new Color(0, 0, 0);
+			daytime = 3;
 		}
 		mygdc = new Color(154, 57, 5);
 		myghc = new Color(16, 44, 18);
