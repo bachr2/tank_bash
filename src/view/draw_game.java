@@ -3,6 +3,7 @@
  */
 package view;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GradientPaint;
@@ -113,9 +114,17 @@ public class draw_game extends JPanel{
 	 */
 	private Color myghc = null;
 	/**
+	 * shape stars
+	 */
+	private Shape stars[] = null;
+	/**
 	 * Rectangle for bullet
 	 */
 	private Rectangle bullet = null;
+	/**
+	 * Rectangle for moon
+	 */
+	private Rectangle moon = null;
 	/**
 	 * Rectangles for tanks
 	 */
@@ -223,11 +232,19 @@ public class draw_game extends JPanel{
     /**
    	 * Image clouds
    	 */
-       private ImageIcon myimg9[] = null;
+    private ImageIcon myimg9[] = null;
    	/**
    	 * Image clouds
    	 */
-       private Image img_cloud[] = null;
+    private Image img_cloud[] = null;
+	/**
+	 * Image moon
+	 */
+	private ImageIcon myimg10 = null;
+	/**
+	 * Image moon
+	 */
+	private Image img_moon = null;
     /**
      * Point of explosion
      */
@@ -316,7 +333,7 @@ public class draw_game extends JPanel{
 	 * @param rInner inner radius
 	 * @return shape of a star
 	 */
-	public static Shape createStar(int arms, Point center, double rOuter, double rInner)
+	private Shape createStar(int arms, Point center, double rOuter, double rInner)
 	{
 	    double angle = Math.PI / arms;
 
@@ -357,14 +374,25 @@ public class draw_game extends JPanel{
 			// TODO sunset & half sun
 		}
 		// moon & stars
-		if(daytime==0){
-			// TODO few stars
-		}
-		else if(daytime==2){
-			// TODO few stars
+		if(daytime==0||daytime==2){
+			// few stars
+			Color mystarcolor = new Color(255, 255, 0, 75);
+			for(int i = 0; i < amount_stars/4; i++){
+				g2d.setColor(mystarcolor);
+		        g2d.setStroke(new BasicStroke(1.0f));
+				g2d.draw((GeneralPath)stars[i]);
+			}
 		}
 		else if(daytime==3){
-			// TODO many stars & moon
+			// many stars & moon
+			Color mystarcolor = new Color(255, 255, 0, 175);
+			for(int i = 0; i < amount_stars; i++){
+				g2d.setColor(mystarcolor);
+		        g2d.setStroke(new BasicStroke(1.0f));
+				g2d.draw(stars[i]);
+				g2d.fill(stars[i]);
+			}
+			g2d.drawImage(img_moon, moon.x, moon.y, null);
 		}
 		// buildings
 		for(int i = 0; i < amount_buildings; i++){
@@ -741,7 +769,7 @@ public class draw_game extends JPanel{
 		amount_tree = 5+Math.abs(myrandom.nextInt()%20);
 		amount_buildings = 1+Math.abs(myrandom.nextInt()%7);
 		amount_clouds = 6+Math.abs(myrandom.nextInt()%25);
-		amount_stars = 600+Math.abs(myrandom.nextInt()%600);
+		amount_stars = 60+Math.abs(myrandom.nextInt()%140);
 		
 		setSize((int) test.width, (int) test.width);
 		
@@ -775,8 +803,17 @@ public class draw_game extends JPanel{
 		myghc = new Color(16, 44, 18);
 		this.setBackground(mybgc);
 		
+		// stars
+		stars = new Shape[amount_stars];
+		for(int i = 0; i < amount_stars; i++){
+			int x = (int) Math.abs(myrandom.nextInt()%(int)test.width);
+			int y = (int) Math.abs(myrandom.nextInt()%(int)test.height);
+			stars[i] = createStar(5, new Point(x,y), 4, 2);
+		}
+		
 		bullet = new Rectangle();
 		bunker = new Rectangle();
+		moon = new Rectangle();
 		ground_d = new Rectangle();
 		ground_h = new Rectangle();
 		tree = new Rectangle[amount_tree];
@@ -809,6 +846,11 @@ public class draw_game extends JPanel{
 		img_cloud = new Image[amount_clouds];
 		cloud_y = new int[amount_clouds];
 		cloud_x = new int[amount_clouds];
+		myimg10 = new ImageIcon(this.getClass().getResource("/moon.png"));
+		img_moon = myimg10.getImage();
+		
+		// moon
+		moon.setLocation((int) Math.abs(myrandom.nextInt()%(int)test.width), (int) Math.abs(myrandom.nextInt()%(int)test.height*2.0/3.0));
 		
 		// tanks
 		for(int i = 0; i < tank.length; i++) {
