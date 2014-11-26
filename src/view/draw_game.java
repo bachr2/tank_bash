@@ -126,6 +126,10 @@ public class draw_game extends JPanel{
 	 */
 	private Rectangle moon = null;
 	/**
+	 * Rectangle for sun
+	 */
+	private Rectangle sun = null;
+	/**
 	 * Rectangles for tanks
 	 */
 	private Rectangle[] tank = null;
@@ -237,7 +241,7 @@ public class draw_game extends JPanel{
    	 * Image clouds
    	 */
     private Image img_cloud[] = null;
-	/**
+    /**
 	 * Image moon
 	 */
 	private ImageIcon myimg10 = null;
@@ -245,6 +249,14 @@ public class draw_game extends JPanel{
 	 * Image moon
 	 */
 	private Image img_moon = null;
+	/**
+	 * Image sun
+	 */
+	private ImageIcon myimg11 = null;
+	/**
+	 * Image sun
+	 */
+	private Image img_sun = null;
     /**
      * Point of explosion
      */
@@ -365,22 +377,34 @@ public class draw_game extends JPanel{
 		g2d.fillRect(0, 0, (int) test.width, 100);
 		// sun
 		if(daytime==0){
-			// TODO dawn & half sun
+			// dawn & half sun
+			gp = new GradientPaint(0, (int) (test.height-250), mybgc, 0, (int) (test.height), Color.yellow);
+	        g2d.setPaint(gp);
+			g2d.drawRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
+			g2d.fillRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
+			g2d.drawImage(img_sun,  sun.x, (int) (test.height - (test.ground1_height + test.ground2_height + img_sun.getHeight(null)/2)), null);
 		}
 		else if(daytime==1){
-			// TODO full sun
+			// full sun
+			g2d.drawImage(img_sun, sun.x, sun.y, null);
 		}
 		else if(daytime==2){
-			// TODO sunset & half sun
+			// sunset & half sun
+			gp = new GradientPaint(0, (int) (test.height-250), mybgc, 0, (int) (test.height), Color.orange);
+	        g2d.setPaint(gp);
+			g2d.drawRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
+			g2d.fillRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
+			g2d.drawImage(img_sun, sun.x, (int) (test.height - (test.ground1_height + test.ground2_height + img_sun.getHeight(null)/2)), null);
 		}
 		// moon & stars
 		if(daytime==0||daytime==2){
 			// few stars
-			Color mystarcolor = new Color(255, 255, 0, 75);
+			Color mystarcolor = new Color(255, 255, 0, 95);
 			for(int i = 0; i < amount_stars/4; i++){
 				g2d.setColor(mystarcolor);
 		        g2d.setStroke(new BasicStroke(1.0f));
-				g2d.draw((GeneralPath)stars[i]);
+				g2d.draw(stars[i]);
+				g2d.fill(stars[i]);
 			}
 		}
 		else if(daytime==3){
@@ -814,6 +838,7 @@ public class draw_game extends JPanel{
 		bullet = new Rectangle();
 		bunker = new Rectangle();
 		moon = new Rectangle();
+		sun = new Rectangle();
 		ground_d = new Rectangle();
 		ground_h = new Rectangle();
 		tree = new Rectangle[amount_tree];
@@ -848,9 +873,13 @@ public class draw_game extends JPanel{
 		cloud_x = new int[amount_clouds];
 		myimg10 = new ImageIcon(this.getClass().getResource("/moon.png"));
 		img_moon = myimg10.getImage();
+		myimg11 = new ImageIcon(this.getClass().getResource("/sun.png"));
+		img_sun = myimg11.getImage();
 		
 		// moon
 		moon.setLocation((int) Math.abs(myrandom.nextInt()%(int)test.width), (int) Math.abs(myrandom.nextInt()%(int)test.height*2.0/3.0));
+		// sun
+		sun.setLocation((int) Math.abs(myrandom.nextInt()%(int)test.width), (int) Math.abs(myrandom.nextInt()%(int)test.height*2.0/3.0));
 		
 		// tanks
 		for(int i = 0; i < tank.length; i++) {
