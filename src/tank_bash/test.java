@@ -33,7 +33,10 @@ public class test extends JFrame {
 	 * break variable
 	 */
 	private static boolean gamebreak = false;
-	
+	/**
+	 * win variable
+	 */
+	private static boolean win = false;
 	/**
 	 * actual player
 	 */
@@ -308,17 +311,39 @@ public class test extends JFrame {
 					}
 					mytanks[score-1].tank_hit();
 				}
+				int team1 = 0;
+				int team2 = 0;
+				for(int i = 0; i < anz_player; i++){
+					if(!mytanks[i].is_dead()){
+						if(mytanks[i].get_tankdata().team==0){
+							team1++;
+						}
+						else{
+							team2++;
+						}
+					}
+				}
+				if (team1 == 0) {
+					win = true;
+					mygame.winner(1);
+				}
+				if (team2 == 0) {
+					win = true;
+					mygame.winner(0);
+				}
 				player++;
 				if(player>=anz_player){
 					player=0;
 				}
-				mytanks[player].reset();
-				while(mytanks[player].is_dead()){
-					player++;
-					if(player>=anz_player){
-						player=0;
-					}
+				if(!win){
 					mytanks[player].reset();
+					while(mytanks[player].is_dead()){
+						player++;
+						if(player>=anz_player){
+							player=0;
+						}
+						mytanks[player].reset();
+					}
 				}
 			}
 		}
@@ -381,7 +406,7 @@ public class test extends JFrame {
 			mytanks[1] = new tank(tank_width,tank_height,1,1);
 			mytanks[1].set_pos(width-(100+diff_width)+tank_width, ground1_height+ground2_height);
 			mytanks[2] = new tank(tank_width,tank_height,0,2);
-			mytanks[2].set_pos(100+80, 20);
+			mytanks[2].set_pos(100+80, ground1_height+ground2_height);
 		}
 		else {
 			mytanks[0] = new tank(tank_width,tank_height,0,0);

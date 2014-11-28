@@ -78,6 +78,10 @@ public class draw_game extends JPanel{
 	 */
 	private int daytime = -1;
 	/**
+	 * win team
+	 */
+	private int win = -1;
+	/**
 	 * Array for sorts of trees
 	 */
 	private int[] tree_x = null;
@@ -279,7 +283,7 @@ public class draw_game extends JPanel{
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		rh.put(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
 		g2d.setRenderingHints(rh);
-
+		
 		drawDesignNotHitable_b(g2d);
 		drawDesignHitable(g2d);
 		for(int i = act_player+mytanks.length; i >= act_player; i--) {
@@ -290,6 +294,17 @@ public class draw_game extends JPanel{
 		drawDesignNotHitable_f(g2d);
 		for(int i = act_player+mytanks.length; i >= act_player; i--) {
 			drawLabel(g2d,i%mytanks.length);
+		}
+		
+		if(win==0 && !isShooting())
+		{
+			drawWinner(g2d,0);
+			drawLoser(g2d,1);
+		}
+		else if(win==1 && !isShooting())
+		{
+			drawWinner(g2d,1);
+			drawLoser(g2d,0);
 		}
     }
 	/**
@@ -302,8 +317,37 @@ public class draw_game extends JPanel{
 	 * @param tanknr integer which tank
 	 */
 	public void shot(shot myshot, int tanknr) {
-		shoting = tanknr;
-		theshot = myshot;
+		if(!isShooting()){
+			shoting = tanknr;
+			theshot = myshot;
+		}
+	}
+	/**
+	 * <h1>create a star shape</h1>
+	 * <br>
+	 * creating a star with swing<br>
+	 * 
+	 * @param arms amount of arms
+	 * @param center of the star
+	 * @param rOuter outer radius
+	 * @param rInner inner radius
+	 * @return shape of a star
+	 */
+	private Shape createStar(int arms, Point center, double rOuter, double rInner)
+	{
+	    double angle = Math.PI / arms;
+
+	    GeneralPath path = new GeneralPath();
+
+	    for (int i = 0; i < 2 * arms; i++)
+	    {
+	        double r = (i & 1) == 0 ? rOuter : rInner;
+	        Point2D.Double p = new Point2D.Double(center.x + Math.cos(i * angle) * r, center.y + Math.sin(i * angle) * r);
+	        if (i == 0) path.moveTo(p.getX(), p.getY());
+	        else path.lineTo(p.getX(), p.getY());
+	    }
+	    path.closePath();
+	    return path;
 	}
 	/**
 	 * <h1>draw the explosions</h1>
@@ -335,31 +379,70 @@ public class draw_game extends JPanel{
 		}
 	}
 	/**
-	 * <h1>create a star shape</h1>
+	 * <h1>draw winner</h1>
 	 * <br>
-	 * creating a star with swing<br>
+	 * draws the winner screen<br>
 	 * 
-	 * @param arms amount of arms
-	 * @param center of the star
-	 * @param rOuter outer radius
-	 * @param rInner inner radius
-	 * @return shape of a star
+	 * @param g2d Graphics to show the objects
+	 * @param wteam which team won
 	 */
-	private Shape createStar(int arms, Point center, double rOuter, double rInner)
-	{
-	    double angle = Math.PI / arms;
-
-	    GeneralPath path = new GeneralPath();
-
-	    for (int i = 0; i < 2 * arms; i++)
-	    {
-	        double r = (i & 1) == 0 ? rOuter : rInner;
-	        Point2D.Double p = new Point2D.Double(center.x + Math.cos(i * angle) * r, center.y + Math.sin(i * angle) * r);
-	        if (i == 0) path.moveTo(p.getX(), p.getY());
-	        else path.lineTo(p.getX(), p.getY());
-	    }
-	    path.closePath();
-	    return path;
+	private void drawWinner(Graphics2D g2d, int wteam) {
+		Color mycolor = g2d.getColor();
+		
+		g2d.setFont(new Font("Purisa", Font.BOLD, 80));
+		
+		String mytext = new String("Team "+(wteam+1)+": WON");
+		Color green_t = new Color(Color.green.getRed(),Color.green.getGreen(),Color.green.getBlue(),100);
+		g2d.setColor(green_t);
+		if(wteam==0){
+			g2d.drawRect(0, 0, (int) test.width/2, (int) test.height);
+			g2d.fillRect(0, 0, (int) test.width/2, (int) test.height);
+			g2d.setColor(Color.black);
+			g2d.drawString(mytext, (int) (test.width/16), (int) test.height/2);
+		}
+		else{
+			g2d.drawRect((int) test.width/2, 0, (int) test.width/2, (int) test.height);
+			g2d.fillRect((int) test.width/2, 0, (int) test.width/2, (int) test.height);
+			g2d.setColor(Color.black);
+			g2d.drawString(mytext, (int) ((test.width/2)+(test.width/16)), (int) test.height/2);
+		}
+		
+		g2d.setFont(new Font("Purisa", Font.BOLD, 12));
+		
+		g2d.setColor(mycolor);
+	}
+	/**
+	 * <h1>draw loser</h1>
+	 * <br>
+	 * draws the loser screen<br>
+	 * 
+	 * @param g2d Graphics to show the objects
+	 * @param lteam which team lost
+	 */
+	private void drawLoser(Graphics2D g2d, int lteam) {
+		Color mycolor = g2d.getColor();
+		
+		g2d.setFont(new Font("Purisa", Font.BOLD, 50));
+		
+		String mytext = new String("Team "+(lteam+1)+": LOST");
+		Color red_t = new Color(Color.red.getRed(),Color.red.getGreen(),Color.red.getBlue(),100);
+		g2d.setColor(red_t);
+		if(lteam==0){
+			g2d.drawRect(0, 0, (int) test.width/2, (int) test.height);
+			g2d.fillRect(0, 0, (int) test.width/2, (int) test.height);
+			g2d.setColor(Color.black);
+			g2d.drawString(mytext, (int) (test.width/8), (int) test.height/2);
+		}
+		else{
+			g2d.drawRect((int) test.width/2, 0, (int) test.width/2, (int) test.height);
+			g2d.fillRect((int) test.width/2, 0, (int) test.width/2, (int) test.height);
+			g2d.setColor(Color.black);
+			g2d.drawString(mytext, (int) ((test.width/2)+(test.width/8)), (int) test.height/2);
+		}
+		
+		g2d.setFont(new Font("Purisa", Font.BOLD, 12));
+		
+		g2d.setColor(mycolor);
 	}
 	/**
 	 * <h1>draw the design</h1>
@@ -382,11 +465,11 @@ public class draw_game extends JPanel{
 	        g2d.setPaint(gp);
 			g2d.drawRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
 			g2d.fillRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
-			g2d.drawImage(img_sun,  sun.x, (int) (test.height - (test.ground1_height + test.ground2_height + img_sun.getHeight(null)/2)), null);
+			g2d.drawImage(img_sun,  sun.x-img_sun.getWidth(null)/2, (int) (test.height - (test.ground1_height + test.ground2_height + img_sun.getHeight(null)/2)), null);
 		}
 		else if(daytime==1){
 			// full sun
-			g2d.drawImage(img_sun, sun.x, sun.y, null);
+			g2d.drawImage(img_sun, sun.x-img_sun.getWidth(null)/2, sun.y, null);
 		}
 		else if(daytime==2){
 			// sunset & half sun
@@ -394,7 +477,7 @@ public class draw_game extends JPanel{
 	        g2d.setPaint(gp);
 			g2d.drawRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
 			g2d.fillRect(0, (int) (test.height-250), (int) test.width, (int) test.height);
-			g2d.drawImage(img_sun, sun.x, (int) (test.height - (test.ground1_height + test.ground2_height + img_sun.getHeight(null)/2)), null);
+			g2d.drawImage(img_sun, sun.x-img_sun.getWidth(null)/2, (int) (test.height - (test.ground1_height + test.ground2_height + img_sun.getHeight(null)/2)), null);
 		}
 		// moon & stars
 		if(daytime==0||daytime==2){
@@ -416,7 +499,7 @@ public class draw_game extends JPanel{
 				g2d.draw(stars[i]);
 				g2d.fill(stars[i]);
 			}
-			g2d.drawImage(img_moon, moon.x, moon.y, null);
+			g2d.drawImage(img_moon, moon.x-img_moon.getWidth(null)/2, moon.y, null);
 		}
 		// buildings
 		for(int i = 0; i < amount_buildings; i++){
@@ -800,13 +883,13 @@ public class draw_game extends JPanel{
 		mytanks=tanks;
 		
 		// 5 - 9 morning
-		if(timestamp%24>=5 && timestamp%24<10){
+		if(timestamp%24>=5 && timestamp%24<9){
 			mybgc = new Color(14, 131, 205);
 			mybgc1 = new Color(0, 0, 0);
 			daytime = 0;
 		}
 		// 10 - 16 day
-		else if(timestamp%24>=10 && timestamp%24<17){
+		else if(timestamp%24>=9 && timestamp%24<17){
 			mybgc = new Color(14, 131, 205);
 			mybgc1 = new Color(0, 0, 0);
 			daytime = 1;
@@ -1020,5 +1103,14 @@ public class draw_game extends JPanel{
 	 */
 	public void set_player(int player) {
 		act_player = player;
+	}
+	/**
+	 * <h1>winner</h1>
+	 * <br>
+	 * set which team won and show it<br>
+	 * @param team which team won
+	 */
+	public void winner(int team) {
+		win = team;
 	}
 }
