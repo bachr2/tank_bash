@@ -74,6 +74,10 @@ public class draw_game extends JPanel{
 	 */
 	private int amount_stars = -1;
 	/**
+	 * amount of birds in the game
+	 */
+	private int amount_birds = -1;
+	/**
 	 * daytime state
 	 */
 	private int daytime = -1;
@@ -101,6 +105,14 @@ public class draw_game extends JPanel{
 	 * Array for x of clouds
 	 */
 	private int[] cloud_x = null;
+	/**
+	 * Array for y of birds
+	 */
+	private int[] birds_y = null;
+	/**
+	 * Array for x of birds
+	 */
+	private int[] birds_x = null;
 	/**
 	 * background color
 	 */
@@ -161,6 +173,10 @@ public class draw_game extends JPanel{
 	 * Rectangles for clouds
 	 */
 	private Rectangle[] cloud = null;
+	/**
+	 * Rectangles for birds
+	 */
+	private Rectangle[] birds = null;
 	/**
 	 * Rectangles for trees
 	 */
@@ -245,6 +261,10 @@ public class draw_game extends JPanel{
    	 * Image clouds
    	 */
     private Image img_cloud[] = null;
+   	/**
+   	 * Image birds
+   	 */
+    private Image img_birds[] = null;
     /**
 	 * Image moon
 	 */
@@ -257,6 +277,10 @@ public class draw_game extends JPanel{
 	 * Image sun
 	 */
 	private ImageIcon myimg11 = null;
+	/**
+   	 * Image birds
+   	 */
+    private ImageIcon myimg12[] = null;
 	/**
 	 * Image sun
 	 */
@@ -522,12 +546,30 @@ public class draw_game extends JPanel{
 			g2d.drawImage(img_cloud[i], cloud[i].x, cloud[i].y, this);
 			if(cloud_x[i]>(int)test.width){
 				cloud_x[i] = myrandom.nextInt()%((int)test.width*2);
-				if(cloud_x[i] > 0){
+				if(cloud_x[i]>0){
 					cloud_x[i]*=-1;
 				}
 			}
 		}
-		// TODO birds
+		// birds
+		for(int i = 0; i < amount_birds*2/3; i++){
+			if(img_birds[i].equals(myimg12[0].getImage())){
+				birds_x[i]+=2;
+				birds[i].setLocation(birds_x[i],birds_y[i]);
+				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				if(birds_x[i]>(int)test.width){
+					birds_x[i] = -Math.abs(myrandom.nextInt())%((int)test.width*2);
+				}
+			}
+			else{
+				birds_x[i]-=2;
+				birds[i].setLocation(birds_x[i],birds_y[i]);
+				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				if(birds_x[i]<0){
+					birds_x[i] = Math.abs(myrandom.nextInt())%((int)test.width*2)+(int)test.width*2;
+				}
+			}
+		}
 		g2d.setColor(mycolor);
 	}
 	/**
@@ -552,12 +594,30 @@ public class draw_game extends JPanel{
 			g2d.drawImage(img_cloud[i], cloud[i].x, cloud[i].y, this);
 			if(cloud_x[i]>(int)test.width){
 				cloud_x[i] = myrandom.nextInt()%((int)test.width*2);
-				if(cloud_x[i] > 0){
+				if(cloud_x[i]>0){
 					cloud_x[i]*=-1;
 				}
 			}
 		}
-		// TODO birds
+		// birds
+		for(int i = amount_birds*2/3; i < amount_birds; i++){
+			if(img_birds[i].equals(myimg12[0].getImage())){
+				birds_x[i]+=3;
+				birds[i].setLocation(birds_x[i],birds_y[i]);
+				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				if(birds_x[i]>(int)test.width){
+					birds_x[i] = -Math.abs(myrandom.nextInt())%((int)test.width*2);
+				}
+			}
+			else{
+				birds_x[i]-=3;
+				birds[i].setLocation(birds_x[i],birds_y[i]);
+				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				if(birds_x[i]<0){
+					birds_x[i] = Math.abs(myrandom.nextInt())%((int)test.width*2)+(int)test.width*2;
+				}
+			}
+		}
 		g2d.setColor(mycolor);
 	}
 	/**
@@ -877,6 +937,7 @@ public class draw_game extends JPanel{
 		amount_buildings = 1+Math.abs(myrandom.nextInt()%7);
 		amount_clouds = 6+Math.abs(myrandom.nextInt()%25);
 		amount_stars = 60+Math.abs(myrandom.nextInt()%140);
+		amount_birds = 5+Math.abs(myrandom.nextInt()%5);
 		
 		setSize((int) test.width, (int) test.width);
 		
@@ -929,6 +990,7 @@ public class draw_game extends JPanel{
 		tank = new Rectangle[tanks.length];
 		barrel = new Rectangle[tanks.length];
 		cloud = new Rectangle[amount_clouds];
+		birds = new Rectangle[amount_birds];
 		myimg = new ImageIcon[tanks.length];
 		img_tank = new Image[tanks.length];
 		myimg1 = new ImageIcon[tanks.length];
@@ -958,6 +1020,10 @@ public class draw_game extends JPanel{
 		img_moon = myimg10.getImage();
 		myimg11 = new ImageIcon(this.getClass().getResource("/sun.png"));
 		img_sun = myimg11.getImage();
+		myimg12 = new ImageIcon[2];
+		img_birds = new Image[amount_birds];
+		birds_y = new int[amount_birds];
+		birds_x = new int[amount_birds];
 		
 		// moon
 		moon.setLocation((int) Math.abs(myrandom.nextInt()%(int)test.width), (int) Math.abs(myrandom.nextInt()%(int)test.height*2.0/3.0));
@@ -987,14 +1053,8 @@ public class draw_game extends JPanel{
 		myimg8[1] = new ImageIcon(this.getClass().getResource("/top_1.png"));
 		for(int i = 0; i < amount_buildings; i++){
 			house[i] = new Rectangle();
-			house_x[i] = myrandom.nextInt()%(int)test.width;
-			house_elements[i] = myrandom.nextInt()%(int)3;
-			if(house_x[i] < 0){
-				house_x[i]*=-1;
-			}
-			if(house_elements[i] < 0){
-				house_elements[i]*=-1;
-			}
+			house_x[i] = Math.abs(myrandom.nextInt())%(int)test.width;
+			house_elements[i] = Math.abs(myrandom.nextInt())%(int)3;
 			house_elements[i]++;
 			int width, height;
 			width = myimg7[0].getIconWidth();
@@ -1022,15 +1082,9 @@ public class draw_game extends JPanel{
 		myimg6[1] = new ImageIcon(this.getClass().getResource("/tree_p.png"));
 		for(int i = 0; i < amount_tree; i++){
 			tree[i] = new Rectangle();
-			tree_x[i] = myrandom.nextInt()%(int)test.width;
-			if(tree_x[i] < 0){
-				tree_x[i]*=-1;
-			}
+			tree_x[i] = Math.abs(myrandom.nextInt())%(int)test.width;
 			int width, height;
-			double scale = myrandom.nextInt()%35;
-			if(scale < 0.0){
-				scale*=-1;
-			}
+			double scale = Math.abs(myrandom.nextInt())%35;
 			width = 1 + (int) (( (double)myimg6[0].getIconWidth() * (90+scale)) / 100.0 );
 			height = 1 + (int) (( (double)myimg6[0].getIconHeight() * (90+scale)) / 100.0 );
 			tree[i].setSize(width, height);
@@ -1050,19 +1104,13 @@ public class draw_game extends JPanel{
 		myimg9[1] = new ImageIcon(this.getClass().getResource("/cloud_1.png"));
 		for(int i = 0; i < amount_clouds; i++){
 			cloud[i] = new Rectangle();
-			cloud_y[i] = myrandom.nextInt()%((int)test.height/4);
-			if(cloud_y[i] < 0){
-				cloud_y[i]*=-1;
-			}
+			cloud_y[i] = Math.abs(myrandom.nextInt())%((int)test.height/4);
 			cloud_x[i] = myrandom.nextInt()%((int)test.width*2);
-			if(cloud_x[i] > 0){
+			if(cloud_x[i]>0){
 				cloud_x[i]*=-1;
 			}
 			int width, height;
-			double scale = myrandom.nextInt()%35;
-			if(scale < 0.0){
-				scale*=-1;
-			}
+			double scale = Math.abs(myrandom.nextInt())%35;
 			width = 1 + (int) (( (double)myimg9[0].getIconWidth() * (95+scale)) / 100.0 );
 			height = 1 + (int) (( (double)myimg9[0].getIconHeight() * (95+scale)) / 100.0 );
 			cloud[i].setSize(width, height);
@@ -1077,7 +1125,26 @@ public class draw_game extends JPanel{
 			}
 		    img_cloud[i] = tmp.getImage();
 		}
-		
+		// birds
+		myimg12[0] = new ImageIcon(this.getClass().getResource("/bird_lr.png"));
+		myimg12[1] = new ImageIcon(this.getClass().getResource("/bird_rl.png"));
+		for(int i = 0; i < amount_birds; i++){
+			birds[i] = new Rectangle();
+			birds_y[i] = Math.abs(myrandom.nextInt())%(int)test.height;
+			birds_x[i] = myrandom.nextInt()%((int)test.width*2);
+			birds[i].setSize(14, 14);
+			ImageIcon tmp = new ImageIcon();
+			if(birds_x[i]<0){
+				tmp = myimg12[0];
+				tmp.setImage(myimg12[0].getImage());
+			}
+			else{
+				birds_x[i] += (int)test.width;
+				tmp = myimg12[1];
+				tmp.setImage(myimg12[1].getImage());
+			}
+		    img_birds[i] = tmp.getImage();
+		}
 	}
 	/**
 	 * <h1>is shooting</h1>
