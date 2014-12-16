@@ -114,6 +114,10 @@ public class draw_game extends JPanel{
 	 */
 	private int[] birds_x = null;
 	/**
+	 * Array for x of birds
+	 */
+	private int[] birds_state = null;
+	/**
 	 * background color
 	 */
 	private Color mybgc = null;
@@ -556,17 +560,25 @@ public class draw_game extends JPanel{
 			if(img_birds[i].equals(myimg12[0].getImage())){
 				birds_x[i]+=2;
 				birds[i].setLocation(birds_x[i],birds_y[i]);
-				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				g2d.drawImage(img_birds[i], birds[i].x-10, birds[i].y-10, birds[i].x+10, birds[i].y+10, birds_state[i]*30, 0, birds_state[i]*30+30, 30, this);
 				if(birds_x[i]>(int)test.width){
 					birds_x[i] = -Math.abs(myrandom.nextInt())%((int)test.width*2);
+				}
+				birds_state[i]++;
+				if(birds_state[i]>=8){
+					birds_state[i]=0;
 				}
 			}
 			else{
 				birds_x[i]-=2;
 				birds[i].setLocation(birds_x[i],birds_y[i]);
-				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				g2d.drawImage(img_birds[i], birds[i].x-10, birds[i].y-10, birds[i].x+10, birds[i].y+10, birds_state[i]*30, 0, birds_state[i]*30+30, 30, this);
 				if(birds_x[i]<0){
 					birds_x[i] = Math.abs(myrandom.nextInt())%((int)test.width*2)+(int)test.width*2;
+				}
+				birds_state[i]++;
+				if(birds_state[i]>=8){
+					birds_state[i]=0;
 				}
 			}
 		}
@@ -604,17 +616,25 @@ public class draw_game extends JPanel{
 			if(img_birds[i].equals(myimg12[0].getImage())){
 				birds_x[i]+=3;
 				birds[i].setLocation(birds_x[i],birds_y[i]);
-				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				g2d.drawImage(img_birds[i], birds[i].x-10, birds[i].y-10, birds[i].x+10, birds[i].y+10, birds_state[i]*30, 0, birds_state[i]*30+30, 30, this);
 				if(birds_x[i]>(int)test.width){
 					birds_x[i] = -Math.abs(myrandom.nextInt())%((int)test.width*2);
+				}
+				birds_state[i]++;
+				if(birds_state[i]>=8){
+					birds_state[i]=0;
 				}
 			}
 			else{
 				birds_x[i]-=3;
 				birds[i].setLocation(birds_x[i],birds_y[i]);
-				g2d.drawImage(img_birds[i], birds[i].x-7, birds[i].y+7, birds[i].x+7, birds[i].y-7, 0, 0, 30, 30, this);
+				g2d.drawImage(img_birds[i], birds[i].x-10, birds[i].y-10, birds[i].x+10, birds[i].y+10, birds_state[i]*30, 0, birds_state[i]*30+30, 30, this);
 				if(birds_x[i]<0){
 					birds_x[i] = Math.abs(myrandom.nextInt())%((int)test.width*2)+(int)test.width*2;
+				}
+				birds_state[i]++;
+				if(birds_state[i]>=8){
+					birds_state[i]=0;
 				}
 			}
 		}
@@ -1024,6 +1044,7 @@ public class draw_game extends JPanel{
 		img_birds = new Image[amount_birds];
 		birds_y = new int[amount_birds];
 		birds_x = new int[amount_birds];
+		birds_state = new int[amount_birds];
 		
 		// moon
 		moon.setLocation((int) Math.abs(myrandom.nextInt()%(int)test.width), (int) Math.abs(myrandom.nextInt()%(int)test.height*2.0/3.0));
@@ -1132,7 +1153,7 @@ public class draw_game extends JPanel{
 			birds[i] = new Rectangle();
 			birds_y[i] = Math.abs(myrandom.nextInt())%(int)test.height;
 			birds_x[i] = myrandom.nextInt()%((int)test.width*2);
-			birds[i].setSize(14, 14);
+			birds[i].setSize(20, 20);
 			ImageIcon tmp = new ImageIcon();
 			if(birds_x[i]<0){
 				tmp = myimg12[0];
