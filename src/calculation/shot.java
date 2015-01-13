@@ -5,6 +5,8 @@ package calculation;
 
 import java.util.ArrayList;
 
+import data.shot_data;
+
 /**
  * @author ricu
  * 

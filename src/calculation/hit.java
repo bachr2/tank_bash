@@ -5,6 +5,7 @@ package calculation;
 
 import java.util.ArrayList;
 
+import data.shot_data;
 import tank_bash.test;
 
 /**

@@ -3,8 +3,10 @@
  */
 package view;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
@@ -26,8 +28,8 @@ import javax.swing.JPanel;
 
 import tank_bash.test;
 import calculation.shot;
-import calculation.shot_data;
 import calculation.tank;
+import data.shot_data;
 
 /**
  * @author ricu
@@ -536,6 +538,13 @@ public class draw_game extends JPanel{
 				g2d.drawImage(img_house[i], house[i].x, img_top[i].getHeight(null)+(img_house[i].getHeight(null)*j)+house[i].y, this);
 			}
 			g2d.drawImage(img_top[i], house[i].x, house[i].y, this);
+			for(int j = 0; j < amount_buildings - i;j++){
+				Composite ctemp = g2d.getComposite();
+				g2d.setComposite(AlphaComposite.SrcOver.derive(0.125f));
+				g2d.setColor(mybgc);
+				g2d.fillRect(house[i].x+9, house[i].y, house[i].width-18, house[i].height);
+				g2d.setComposite(ctemp);
+			}
 		}
 		// trees
 		for(int i = 0; i < amount_tree*2/3; i++){
@@ -673,7 +682,15 @@ public class draw_game extends JPanel{
 				(int) test.bunker_height
 		);
 		g2d.drawImage(img_bunker,bunker.x,bunker.y,this);
-		// TODO easteregg
+		/*if(has_easteregg){
+			// TODO paint easteregg
+		}
+		else {*/
+			// TODO start easteregg
+			/*if(){
+				has_easteregg = true;
+			}*/
+		//}
 		g2d.setColor(mycolor);
 	}
 	/**
@@ -1075,8 +1092,7 @@ public class draw_game extends JPanel{
 		for(int i = 0; i < amount_buildings; i++){
 			house[i] = new Rectangle();
 			house_x[i] = Math.abs(myrandom.nextInt())%(int)test.width;
-			house_elements[i] = Math.abs(myrandom.nextInt())%(int)3;
-			house_elements[i]++;
+			house_elements[i] = 2+Math.abs(myrandom.nextInt())%(int)3;
 			int width, height;
 			width = myimg7[0].getIconWidth();
 			height = house_elements[i] * myimg7[0].getIconHeight() + myimg8[0].getIconHeight();

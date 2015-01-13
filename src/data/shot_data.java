@@ -1,7 +1,7 @@
 /**
  * 
  */
-package calculation;
+package data;
 
 /**
  * @author ricu
